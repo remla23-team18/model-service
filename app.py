@@ -3,9 +3,11 @@ from flasgger import Swagger
 import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 import pickle
+from flask_cors import CORS
 
 app = Flask(__name__)
 swagger = Swagger(app)
+CORS(app)
 
 # Loading BoW dictionary and the classifier
 cv = pickle.load(open('models/c1_BoW_Sentiment_Model.pkl', "rb"))
