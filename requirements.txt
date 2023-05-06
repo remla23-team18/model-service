@@ -4,3 +4,4 @@ flasgger==0.9.4
 joblib
 scikit-learn
 flask_cors
+nltk

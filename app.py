@@ -5,6 +5,12 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pickle
 from flask_cors import CORS
 
+import re
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+ps = PorterStemmer()
+
 app = Flask(__name__)
 swagger = Swagger(app)
 CORS(app)
@@ -38,7 +44,7 @@ def predict():
         description: Some result
     """
     msg = request.get_json().get('msg')
-    processed_input = cv.transform([msg]).toarray()[0]
+    processed_input = cv.transform([clean_review(msg)]).toarray()[0]
     prediction = classifier.predict([processed_input])[0]
 
     return {
@@ -46,3 +52,13 @@ def predict():
     }
 
 app.run(host="0.0.0.0", port=8080, debug=True)
+
+all_stopwords = stopwords.words('english')
+all_stopwords.remove('not')
+def clean_review(review):
+    review = re.sub('[^a-zA-Z]', ' ', review)
+    review = review.lower()
+    review = review.split()
+    review = [ps.stem(word) for word in review if not word in set(all_stopwords)]
+    review = ' '.join(review)
+    return review
