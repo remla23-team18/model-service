@@ -5,12 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pickle
 from flask_cors import CORS
 
-import re
-import nltk
-nltk.download('stopwords')
-from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
-ps = PorterStemmer()
+from scripts.preprocess import clean_review
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -19,16 +14,6 @@ CORS(app)
 # Loading BoW dictionary and the classifier
 cv = pickle.load(open('models/c1_BoW_Sentiment_Model.pkl', "rb"))
 classifier = joblib.load('models/c2_Classifier_Sentiment_Model')
-
-all_stopwords = stopwords.words('english')
-all_stopwords.remove('not')
-def clean_review(review):
-    review = re.sub('[^a-zA-Z]', ' ', review)
-    review = review.lower()
-    review = review.split()
-    review = [ps.stem(word) for word in review if not word in set(all_stopwords)]
-    review = ' '.join(review)
-    return review
 
 @app.route('/', methods=['POST'])
 def predict():
