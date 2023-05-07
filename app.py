@@ -6,6 +6,7 @@ import pickle
 from flask_cors import CORS
 
 import re
+import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
