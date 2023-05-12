@@ -15,7 +15,7 @@ CORS(app)
 cv = pickle.load(open('models/c1_BoW_Sentiment_Model.pkl', "rb"))
 classifier = joblib.load('models/c2_Classifier_Sentiment_Model')
 
-@app.route('/', methods=['POST'])
+@app.route('/predict', methods=['POST'])
 def predict():
     """
     Make a hardcoded prediction
@@ -46,4 +46,6 @@ def predict():
         "sentiment": int(prediction),
     }
 
-app.run(host="0.0.0.0", port=8080, debug=True)
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=8080, debug=True)
+
