@@ -39,7 +39,7 @@ text_length_histogram = Histogram(
 # 4. Summary: response time
 summary_metric = Summary('response_time_seconds', 'Response time in seconds')
 
-
+@summary_metric.time()
 @app.route('/predict', methods=['POST'])
 def predict():
     """
@@ -132,6 +132,7 @@ def metrics():
     registry.register(correct_prediction)
     registry.register(total_prediction)
     registry.register(accuracy)
+    registry.register(summary_metric)
 
     return Response(prometheus_client.generate_latest(registry), mimetype="text/plain")
 
