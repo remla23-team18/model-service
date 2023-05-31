@@ -1,22 +1,30 @@
 from flask import Flask, request, Response
-from random import random
 from flasgger import Swagger
 import joblib
 import pickle
 from flask_cors import CORS
 
-from scripts.preprocess import clean_review
+from model_training.preprocess import clean_review, setup_stopwords
 from prometheus_client import Histogram, Summary, Counter, Gauge
 import prometheus_client
 
+from dvc.api import DVCFileSystem
+
+stopwords = setup_stopwords()
 
 app = Flask(__name__)
 swagger = Swagger(app)
 CORS(app)
 
+# Load the model from dvc
+repo = 'https://github.com/remla23-team18/model-training.git'
+fs = DVCFileSystem(url=repo, rev='main')
+
 # Loading BoW dictionary and the classifier
-cv = pickle.load(open('models/c1_BoW_Sentiment_Model.pkl', "rb"))
-classifier = joblib.load('models/c2_Classifier_Sentiment_Model')
+with fs.open('/models/c1_BoW_Sentiment_Model.pkl', mode='rb') as f:
+    cv = pickle.load(f)
+with fs.open('/models/c2_Classifier_Sentiment_Model') as f:
+    classifier = joblib.load(f)
 
 # Set the metrics for prometheus
 
@@ -68,7 +76,7 @@ def predict():
     predict_counter.inc()
 
     msg = request.get_json().get('msg')
-    processed_input = cv.transform([clean_review(msg)]).toarray()[0]
+    processed_input = cv.transform([clean_review(msg, stopwords)]).toarray()[0]
     prediction = classifier.predict([processed_input])[0]
 
     # Measure the length of the input text

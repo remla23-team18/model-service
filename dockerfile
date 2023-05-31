@@ -1,26 +1,24 @@
 # Use the Python 3.7 image
-FROM python:3.7
+FROM python:3.10.6
 
 # Set the working directory
 WORKDIR /root
 
+ENV POETRY_HOME="/opt/poetry" \
+    POETRY_VERSION=1.5.1 \
+    PATH="/opt/poetry/bin:$PATH"
+
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
 # Copy the requirements file to the container
-COPY requirements.txt /root/
+COPY pyproject.toml poetry.lock /root/
 
 # Install the Python dependencies
-RUN pip install -r requirements.txt
+RUN poetry install --no-root
 
 # Copy the application code to the container
 COPY app.py /root/
 
-# Download the models and save them to the models folder
-RUN mkdir -p /root/models \
-    && curl -L -o /root/models/c1_BoW_Sentiment_Model.pkl https://github.com/remla23-team18/model-training/raw/main/models/c1_BoW_Sentiment_Model.pkl \
-    && curl -L -o /root/models/c2_Classifier_Sentiment_Model https://github.com/remla23-team18/model-training/raw/main/models/c2_Classifier_Sentiment_Model
-
-RUN mkdir -p /root/scripts \
-    && curl -L -o /root/scripts/preprocess.py https://github.com/remla23-team18/model-training/raw/main/preprocess.py
-
 # Set the entrypoint and default command for the container
-ENTRYPOINT ["python"]
+ENTRYPOINT ["poetry", "run", "python"]
 CMD ["app.py"]
